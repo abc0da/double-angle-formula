@@ -456,6 +456,17 @@
 
 
 <script>
+
+const bgImages = [
+        'https://s21.ax1x.com/2025/02/20/pEQysqe.png',
+        'https://s21.ax1x.com/2025/02/20/pEQy6VH.png',
+        'https://s21.ax1x.com/2025/02/20/pEQycad.png'
+    ];
+    const randomBg = bgImages[Math.floor(Math.random() * bgImages.length)];
+    document.body.style.backgroundImage = `url('${randomBg}')`;
+
+
+
         // 音乐控制逻辑
         const musicBtn = document.getElementById('music-btn');
         let isPlaying = false;
