@@ -34,6 +34,7 @@
             grid-template-columns: repeat(4, 80px);
             grid-template-rows: repeat(4, 80px);
             gap: 10px;
+            z-index: 100; /* 降低游戏网格的z-index */
             margin: 20px 0;
         }
         
@@ -58,8 +59,8 @@
         
         /* 高亮样式 */
         .selected {
-            transform: scale(1.1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transform: scale(1.2);
+            box-shadow: 0 4px 10px rgba(7, 255, 255, 0.87);
         }
         
         /* 计分器 */
@@ -70,6 +71,46 @@
             margin-bottom: 20px;
         }
         
+        .guide-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+}
+
+.guide-step {
+    max-width: 600px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    
+    position: relative;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.guide-button {
+    padding: 10px 20px;
+    background: #42a5f5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    
+    position: relative;
+    cursor: pointer;
+    font-size: 16px;
+}
+
 /* 爆炸动画 */
         @keyframes explode {
             0% {
@@ -148,12 +189,24 @@
             background: #fff;
             border-radius: 10px;
             width: 300px;
+            z-index: 100; /* 降低游戏网格的z-index */
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
     </style>
 </head>
+
+
 <body>
+    
+    <div id="guide-overlay" class="guide-overlay">
+        <div class="guide-step">
+            <h2>欢迎来到合成二倍角游戏！</h2>
+            <p>这是一个通过合成三角函数来学习二倍角公式的游戏。</p>
+            <button class="guide-button" onclick="nextGuideStep()">下一步</button>
+        </div>
+    </div>
+    
     <!-- 添加音乐控制按钮 -->
     <button id="music-btn" style="
         position: fixed;
@@ -174,9 +227,12 @@
         <!-- 16个格子将由JavaScript生成 -->
     </div>
     <div class="formula-display" id="formula-display">合成二倍角<br><br>
-         点击方块进行合成</div>
+         点击相邻方块进行合成</div>
+
 
     <script>
+
+
         // 游戏逻辑
         const grid = document.getElementById('game-grid');
         const formulaDisplay = document.getElementById('formula-display');
@@ -184,8 +240,69 @@
         let selectedCells = [];
         let score = 0;
 
+// 新手引导逻辑
+let currentStep = 0;
+const guideSteps = [
+    {
+        content: "游戏目标是通过合成三角函数来复习二倍角公式。",
+        // highlight: null
+    },
+    {
+        content: "点击两个相邻的格子进行合成<br><br>如果它们能凑成二倍角公式<br><br>就会合并成更高级的三角函数",
+        // highlight: ".grid"
+    },
+    {
+        content: "例如sinα和cosα可以合成sinαcosα<br><br>然后sinαcosα和2可以进一步合成sin2α。",
+        // highlight: null
+    },
+    {
+        content: "每次成功合成都会显示对应的二倍角公式，帮助你学习。",
+        // highlight: ".formula-display"
+    },
+    {
+        content: "合成高级三角函数可以获得更多分数，让我们开始吧！",
+        // highlight: ".score"
+    }
+];
+
+function showGuide() {
+    const overlay = document.getElementById('guide-overlay');
+    const stepContent = guideSteps[currentStep];
+    
+    overlay.innerHTML = `
+        <div class="guide-step">
+            <p>${stepContent.content}</p>
+            <button class="guide-button" onclick="nextGuideStep()">
+                ${currentStep === guideSteps.length - 1 ? '开始游戏' : '下一步'}
+            </button>
+        </div>
+    `;
+    
+    // if (stepContent.highlight) {
+    //     const element = document.querySelector(stepContent.highlight);
+    //     element.style.zIndex = "1000";
+    //     element.style.position = "relative";
+    // }
+}
+
+function nextGuideStep() {
+    if (currentStep < guideSteps.length - 1) {
+        currentStep++;
+        showGuide();
+    } else {
+        document.getElementById('guide-overlay').style.display = 'none';
+        // 重置所有高亮元素的样式
+        document.querySelectorAll('.grid, .formula-display, .score').forEach(el => {
+            el.style.zIndex = "";
+            el.style.position = "";
+        });
+    }
+}
+
+
         // 初始化游戏
         function initGame() {
+            showGuide();
             const items = ['sinα', 'cosα', '1', '2'];
             const maxCount = 8; // 1和2的总数不超过8
             
